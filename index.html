@@ -5,41 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEEW ROSSE</title>
 <style>
-  /* Reset base */
   *{margin:0; padding:0; box-sizing:border-box;}
-  html,body{width:100%; height:100%; overflow:hidden; font-family:'Arial',sans-serif; background:#000;}
-  
-  /* Texto central */
+  html,body{width:100%;height:100%;overflow:hidden; font-family:'Arial',sans-serif; background:#000;}
+
+  /* Texto central premium */
   .centro{
     position:absolute;
     top:50%; left:50%;
     transform:translate(-50%,-50%);
     font-size:clamp(60px,12vw,120px);
-    color:rgba(255,255,255,1);
+    color:#fff;
     font-weight:bold;
     text-align:center;
     z-index:100;
     pointer-events:none;
+    text-shadow:0 0 20px rgba(255,255,255,0.7);
   }
 
   /* Textos flotantes */
   .texto{
     position:absolute;
-    font-size:clamp(20px,4vw,40px);
-    font-weight:bold;
+    font-size:clamp(20px,3vw,35px);
     color:rgba(255,255,255,0.5);
     user-select:none;
     white-space:nowrap;
     cursor:grab;
-    transition: transform 0.2s, color 0.2s;
+    transition:color 0.3s;
   }
 
-  /* Botón ejemplo para tienda */
+  /* Botón premium */
   .boton-producto{
     position:absolute;
     bottom:50px; left:50%;
     transform:translateX(-50%);
-    padding:15px 30px;
+    padding:15px 35px;
     font-size:clamp(16px,2vw,24px);
     background:rgba(255,255,255,0.2);
     color:#fff;
@@ -59,8 +58,8 @@
     display:block;
     position:absolute;
     top:0; left:0;
+    z-index:0;
   }
-
 </style>
 </head>
 <body>
@@ -70,36 +69,50 @@
 <canvas id="fondo"></canvas>
 
 <script>
-/* ==== Fondo partículas 3D ==== */
+/* ==== PARTICULAS PREMIUM ==== */
 const canvas = document.getElementById('fondo');
 const ctx = canvas.getContext('2d');
-let w=canvas.width=window.innerWidth;
-let h=canvas.height=window.innerHeight;
+let w = canvas.width = window.innerWidth;
+let h = canvas.height = window.innerHeight;
 
+// Partículas que siguen el cursor
+let cursor = {x:w/2, y:h/2};
 class Particula{
   constructor(){
-    this.x=Math.random()*w;
-    this.y=Math.random()*h;
-    this.vx=(Math.random()-0.5)*1.5;
-    this.vy=(Math.random()-0.5)*1.5;
-    this.size=Math.random()*3+1;
+    this.x = Math.random()*w;
+    this.y = Math.random()*h;
+    this.vx = (Math.random()-0.5)*0.5; // más lento
+    this.vy = (Math.random()-0.5)*0.5;
+    this.size = Math.random()*3+1;
   }
   dibujar(){
-    ctx.fillStyle='rgba(255,255,255,0.5)';
+    ctx.fillStyle='rgba(255,255,255,0.6)';
     ctx.beginPath();
     ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
     ctx.fill();
   }
   mover(){
-    this.x+=this.vx;
-    this.y+=this.vy;
-    if(this.x<0||this.x>w) this.vx*=-1;
-    if(this.y<0||this.y>h) this.vy*=-1;
+    // Movimiento aleatorio
+    this.x += this.vx;
+    this.y += this.vy;
+
+    // Rebote bordes
+    if(this.x<0 || this.x>w) this.vx*=-1;
+    if(this.y<0 || this.y>h) this.vy*=-1;
+
+    // Interacción con cursor
+    let dx = cursor.x - this.x;
+    let dy = cursor.y - this.y;
+    let dist = Math.sqrt(dx*dx+dy*dy);
+    if(dist<100){
+      this.x += dx*0.002;
+      this.y += dy*0.002;
+    }
   }
 }
 
 const particulas=[];
-for(let i=0;i<100;i++) particulas.push(new Particula());
+for(let i=0;i<120;i++) particulas.push(new Particula());
 
 function animarCanvas(){
   ctx.clearRect(0,0,w,h);
@@ -116,10 +129,10 @@ window.addEventListener('resize',()=>{
   h=canvas.height=window.innerHeight;
 });
 
-/* ==== Textos flotantes interactivos ==== */
-const cantidad=50;
+/* ==== TEXTOS FLOTANTES ==== */
+const cantidad=40;
 const textos=[];
-const velocidadMax=3;
+const velocidadMax=0.3; // muy lento
 
 for(let i=0;i<cantidad;i++){
   const span=document.createElement('span');
@@ -127,49 +140,25 @@ for(let i=0;i<cantidad;i++){
   span.innerText='neew rosse';
   document.body.appendChild(span);
 
-  span.x=Math.random()*window.innerWidth;
-  span.y=Math.random()*window.innerHeight;
+  span.x=Math.random()*w;
+  span.y=Math.random()*h;
   span.vx=(Math.random()-0.5)*velocidadMax;
   span.vy=(Math.random()-0.5)*velocidadMax;
 
   span.style.left=span.x+'px';
   span.style.top=span.y+'px';
-  span.style.transform=`rotate(${Math.random()*360}deg) scale(${Math.random()*1.5+0.5})`;
 
   textos.push(span);
-
-  span.addEventListener('click', ()=>{
-    span.style.color=`rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},0.8)`;
-    span.style.transform=`rotate(${Math.random()*360}deg) scale(${Math.random()*2})`;
-  });
-
-  span.onmousedown=function(e){
-    const offsetX=e.clientX-span.offsetLeft;
-    const offsetY=e.clientY-span.offsetTop;
-    function mover(e){
-      span.x=e.clientX-offsetX;
-      span.y=e.clientY-offsetY;
-      span.style.left=span.x+'px';
-      span.style.top=span.y+'px';
-    }
-    function soltar(){
-      document.removeEventListener('mousemove',mover);
-      document.removeEventListener('mouseup',soltar);
-    }
-    document.addEventListener('mousemove',mover);
-    document.addEventListener('mouseup',soltar);
-  };
 }
 
+// Animación de textos
 function animarTextos(){
-  const ancho=window.innerWidth;
-  const alto=window.innerHeight;
   textos.forEach(el=>{
     el.x+=el.vx;
     el.y+=el.vy;
-    if(el.x<0 || el.x>ancho-el.offsetWidth) el.vx*=-1;
-    if(el.y<0 || el.y>alto-el.offsetHeight) el.vy*=-1;
-    el.style.transform=`rotate(${Math.random()*360}deg) scale(${Math.random()*1.5+0.5})`;
+    // Rebote en pantalla
+    if(el.x<0 || el.x>w-el.offsetWidth) el.vx*=-1;
+    if(el.y<0 || el.y>h-el.offsetHeight) el.vy*=-1;
     el.style.left=el.x+'px';
     el.style.top=el.y+'px';
   });
@@ -177,24 +166,29 @@ function animarTextos(){
 }
 animarTextos();
 
-/* Interacción con cursor */
+/* ==== INTERACCIÓN CURSOR ==== */
 window.addEventListener('mousemove', e=>{
+  cursor.x=e.clientX;
+  cursor.y=e.clientY;
+
   textos.forEach(el=>{
     const dx=e.clientX-(el.x+el.offsetWidth/2);
     const dy=e.clientY-(el.y+el.offsetHeight/2);
     const distancia=Math.sqrt(dx*dx+dy*dy);
-    if(distancia<150){
-      el.x-=dx/50;
-      el.y-=dy/50;
+    if(distancia<120){
+      el.x -= dx*0.002; // parallax ligero
+      el.y -= dy*0.002;
     }
   });
 });
 
-/* Ajuste responsive */
+/* ==== RESPONSIVE ==== */
 window.addEventListener('resize',()=>{
+  w=canvas.width=window.innerWidth;
+  h=canvas.height=window.innerHeight;
   textos.forEach(el=>{
-    el.x=Math.random()*window.innerWidth;
-    el.y=Math.random()*window.innerHeight;
+    el.x=Math.random()*w;
+    el.y=Math.random()*h;
   });
 });
 </script>
