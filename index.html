@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Neew Rosse</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000; /* fondo negro */
+            position: relative;
+            height: 100vh;
+            width: 100vw;
+            font-family: Arial, sans-serif;
+        }
+
+        .texto {
+            position: absolute;
+            font-size: 40px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.3); /* blanco 50% */
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .centro {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 1); /* blanco 100% */
+            pointer-events: none;
+            user-select: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="centro">NEEW ROSSE</div>
+
+<script>
+    const cantidad = 20; // número de "neew rosse" aleatorios
+    const textos = [];
+
+    for (let i = 0; i < cantidad; i++) {
+        const span = document.createElement('span');
+        span.className = 'texto';
+        span.innerText = 'NEEW ROSSE';
+        document.body.appendChild(span);
+        textos.push(span);
+
+        moverTexto(span);
+    }
+
+    function moverTexto(el) {
+        const ancho = window.innerWidth;
+        const alto = window.innerHeight;
+
+        el.style.left = Math.random() * ancho + 'px';
+        el.style.top = Math.random() * alto + 'px';
+        el.style.transform = `rotate(${Math.random() * 360}deg) scale(${Math.random() * 2 + 0.5})`;
+
+        // Cambiar posición cada 2-4 segundos
+        setTimeout(() => moverTexto(el), 2000 + Math.random()*2000);
+    }
+
+    window.addEventListener('resize', () => {
+        textos.forEach(moverTexto);
+    });
+</script>
+
+</body>
+</html>
