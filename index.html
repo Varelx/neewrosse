@@ -1,76 +1,135 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Neew Rosse</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: #000; /* fondo negro */
-            position: relative;
-            height: 100vh;
-            width: 100vw;
-            font-family: Arial, sans-serif;
-        }
-
-        .texto {
-            position: absolute;
-            font-size: 40px;
-            font-weight: bold;
-            color: rgba(255, 255, 255, 0.3); /* blanco 50% */
-            pointer-events: none;
-            user-select: none;
-            white-space: nowrap;
-        }
-
-        .centro {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 120px;
-            font-weight: bold;
-            color: rgba(255, 255, 255, 1); /* blanco 100% */
-            pointer-events: none;
-            user-select: none;
-            text-align: center;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEEW ROSSE</title>
+<style>
+    /* Reset y estilos base */
+    * {margin:0; padding:0; box-sizing:border-box;}
+    html, body {width:100%; height:100%; overflow:hidden; font-family: 'Arial', sans-serif; background:#000;}
+    .centro {
+        position:absolute;
+        top:50%; left:50%;
+        transform:translate(-50%,-50%);
+        font-size:clamp(60px, 12vw, 120px);
+        color:rgba(255,255,255,1);
+        font-weight:bold;
+        text-align:center;
+        z-index:100;
+        pointer-events:none;
+    }
+    .texto {
+        position:absolute;
+        font-size:clamp(20px, 4vw, 40px);
+        font-weight:bold;
+        color:rgba(255,255,255,0.5);
+        user-select:none;
+        white-space:nowrap;
+        cursor:grab;
+        transition: transform 0.2s, color 0.2s;
+    }
+</style>
 </head>
 <body>
 
 <div class="centro">NEEW ROSSE</div>
 
 <script>
-    const cantidad = 20; // número de "neew rosse" aleatorios
-    const textos = [];
+const cantidad = 50;
+const textos = [];
+const velocidadMax = 3;
 
-    for (let i = 0; i < cantidad; i++) {
-        const span = document.createElement('span');
-        span.className = 'texto';
-        span.innerText = 'NEEW ROSSE';
-        document.body.appendChild(span);
-        textos.push(span);
+// Crear textos flotantes
+for (let i=0;i<cantidad;i++){
+    const span = document.createElement('span');
+    span.className='texto';
+    span.innerText='neew rosse';
+    document.body.appendChild(span);
 
-        moverTexto(span);
-    }
+    // Posición inicial aleatoria
+    span.x=Math.random()*window.innerWidth;
+    span.y=Math.random()*window.innerHeight;
 
-    function moverTexto(el) {
-        const ancho = window.innerWidth;
-        const alto = window.innerHeight;
+    // Velocidad aleatoria
+    span.vx=(Math.random()-0.5)*velocidadMax;
+    span.vy=(Math.random()-0.5)*velocidadMax;
 
-        el.style.left = Math.random() * ancho + 'px';
-        el.style.top = Math.random() * alto + 'px';
-        el.style.transform = `rotate(${Math.random() * 360}deg) scale(${Math.random() * 2 + 0.5})`;
+    // Transformación inicial
+    span.style.left=span.x+'px';
+    span.style.top=span.y+'px';
+    span.style.transform=`rotate(${Math.random()*360}deg) scale(${Math.random()*1.5+0.5})`;
 
-        // Cambiar posición cada 2-4 segundos
-        setTimeout(() => moverTexto(el), 2000 + Math.random()*2000);
-    }
+    textos.push(span);
 
-    window.addEventListener('resize', () => {
-        textos.forEach(moverTexto);
+    // Interacción: cambiar color al hacer clic
+    span.addEventListener('click', ()=>{
+        span.style.color=`rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},0.8)`;
+        span.style.transform=`rotate(${Math.random()*360}deg) scale(${Math.random()*2})`;
     });
+
+    // Interacción: arrastrar
+    span.onmousedown=function(e){
+        const offsetX=e.clientX-span.offsetLeft;
+        const offsetY=e.clientY-span.offsetTop;
+        function mover(e){
+            span.x=e.clientX-offsetX;
+            span.y=e.clientY-offsetY;
+            span.style.left=span.x+'px';
+            span.style.top=span.y+'px';
+        }
+        function soltar(){
+            document.removeEventListener('mousemove',mover);
+            document.removeEventListener('mouseup',soltar);
+        }
+        document.addEventListener('mousemove',mover);
+        document.addEventListener('mouseup',soltar);
+    };
+}
+
+// Animación principal
+function animar(){
+    const ancho=window.innerWidth;
+    const alto=window.innerHeight;
+
+    textos.forEach(el=>{
+        el.x+=el.vx;
+        el.y+=el.vy;
+
+        // Rebote
+        if(el.x<0 || el.x>ancho-el.offsetWidth) el.vx*=-1;
+        if(el.y<0 || el.y>alto-el.offsetHeight) el.vy*=-1;
+
+        // Movimiento random de rotación y escala
+        el.style.transform=`rotate(${Math.random()*360}deg) scale(${Math.random()*1.5+0.5})`;
+        el.style.left=el.x+'px';
+        el.style.top=el.y+'px';
+    });
+
+    requestAnimationFrame(animar);
+}
+animar();
+
+// Interacción con cursor
+window.addEventListener('mousemove', e=>{
+    textos.forEach(el=>{
+        const dx=e.clientX-(el.x+el.offsetWidth/2);
+        const dy=e.clientY-(el.y+el.offsetHeight/2);
+        const distancia=Math.sqrt(dx*dx+dy*dy);
+        if(distancia<150){
+            el.x-=dx/50;
+            el.y-=dy/50;
+        }
+    });
+});
+
+// Ajuste responsive
+window.addEventListener('resize',()=>{
+    textos.forEach(el=>{
+        el.x=Math.random()*window.innerWidth;
+        el.y=Math.random()*window.innerHeight;
+    });
+});
 </script>
 
 </body>
