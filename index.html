@@ -1,110 +1,75 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Neew Rosse Loco</title>
-<style>
-    body {
-        margin: 0;
-        overflow: hidden;
-        background-color: #000;
-        font-family: Arial, sans-serif;
-    }
-    .texto {
-        position: absolute;
-        font-size: 40px;
-        font-weight: bold;
-        color: rgba(255, 255, 255, 0.5);
-        pointer-events: none;
-        user-select: none;
-        white-space: nowrap;
-    }
-    .centro {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 120px;
-        font-weight: bold;
-        color: rgba(255, 255, 255, 1);
-        pointer-events: none;
-        user-select: none;
-        text-align: center;
-    }
-</style>
+    <meta charset="UTF-8">
+    <title>Neew Rosse</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000; /* fondo negro */
+            position: relative;
+            height: 100vh;
+            width: 100vw;
+            font-family: Arial, sans-serif;
+        }
+
+        .texto {
+            position: absolute;
+            font-size: 40px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.3); /* blanco 50% */
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .centro {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 1); /* blanco 100% */
+            pointer-events: none;
+            user-select: none;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 
 <div class="centro">NEEW ROSSE</div>
 
 <script>
-    const cantidad = 50; // número de textos aleatorios
+    const cantidad = 20; // número de "neew rosse" aleatorios
     const textos = [];
-    const velocidadMax = 3; // velocidad máxima de movimiento
 
     for (let i = 0; i < cantidad; i++) {
         const span = document.createElement('span');
         span.className = 'texto';
-        span.innerText = 'neew rosse';
+        span.innerText = 'NEEW ROSSE';
         document.body.appendChild(span);
-
-        // Posición inicial
-        span.x = Math.random() * window.innerWidth;
-        span.y = Math.random() * window.innerHeight;
-
-        // Velocidad inicial
-        span.vx = (Math.random() - 0.5) * velocidadMax;
-        span.vy = (Math.random() - 0.5) * velocidadMax;
-
-        span.style.left = span.x + 'px';
-        span.style.top = span.y + 'px';
-        span.style.transform = `rotate(${Math.random() * 360}deg) scale(${Math.random() * 2 + 0.5})`;
-
         textos.push(span);
+
+        moverTexto(span);
     }
 
-    function animar() {
+    function moverTexto(el) {
         const ancho = window.innerWidth;
         const alto = window.innerHeight;
 
-        textos.forEach(el => {
-            // Mover
-            el.x += el.vx;
-            el.y += el.vy;
+        el.style.left = Math.random() * ancho + 'px';
+        el.style.top = Math.random() * alto + 'px';
+        el.style.transform = `rotate(${Math.random() * 360}deg) scale(${Math.random() * 2 + 0.5})`;
 
-            // Rebote en los bordes
-            if (el.x < 0 || el.x > ancho - el.offsetWidth) el.vx *= -1;
-            if (el.y < 0 || el.y > alto - el.offsetHeight) el.vy *= -1;
-
-            el.style.left = el.x + 'px';
-            el.style.top = el.y + 'px';
-            el.style.transform = `rotate(${Math.random() * 360}deg) scale(${Math.random() * 2 + 0.5})`;
-        });
-
-        requestAnimationFrame(animar);
+        // Cambiar posición cada 2-4 segundos
+        setTimeout(() => moverTexto(el), 2000 + Math.random()*2000);
     }
 
-    animar();
-
-    // Interacción con el ratón
-    window.addEventListener('mousemove', e => {
-        textos.forEach(el => {
-            const dx = e.clientX - (el.x + el.offsetWidth/2);
-            const dy = e.clientY - (el.y + el.offsetHeight/2);
-            const distancia = Math.sqrt(dx*dx + dy*dy);
-            if (distancia < 200) { // si el ratón está cerca
-                el.x -= dx/50;
-                el.y -= dy/50;
-            }
-        });
-    });
-
-    // Ajustar al cambiar tamaño de pantalla
     window.addEventListener('resize', () => {
-        textos.forEach(el => {
-            el.x = Math.random() * window.innerWidth;
-            el.y = Math.random() * window.innerHeight;
-        });
+        textos.forEach(moverTexto);
     });
 </script>
 
